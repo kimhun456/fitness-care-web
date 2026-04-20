@@ -305,13 +305,64 @@ export function applyIntensityToExercise(exercise, intensity) {
   return exercise;
 }
 
+function getRoundCountForIntensity(routine, intensity) {
+  if (routine.kind === 'optional' || routine.kind === 'rest') return 1;
+
+  const rangeMatch = routine.rounds.match(/(\d+)~(\d+)라운드/);
+  if (rangeMatch) {
+    const min = Number(rangeMatch[1]);
+    const max = Number(rangeMatch[2]);
+    return intensity === 'focus' ? max : min;
+  }
+
+  const fixedMatch = routine.rounds.match(/(\d+)라운드/);
+  if (fixedMatch) {
+    return Number(fixedMatch[1]);
+  }
+
+  return 1;
+}
+
+function formatRoundLabel(roundCount) {
+  return roundCount <= 1 ? '1세트 흐름' : `${roundCount}라운드`;
+}
+
+function buildRoutineEntries(routine, intensity) {
+  const roundCount = getRoundCountForIntensity(routine, intensity);
+  const entries = [];
+
+  for (let round = 1; round <= roundCount; round += 1) {
+    routine.exercises.forEach((exercise, exerciseIndex) => {
+      entries.push({
+        ...exercise,
+        round,
+        exerciseIndex,
+        key: `r${round}-e${exerciseIndex}`,
+      });
+    });
+  }
+
+  return entries;
+}
+
 function getSelectedRoutine(log = getWorkoutLog()) {
   const routine = routineCatalog[getSelectedPlan().key];
   const intensity = log.intensity || 'normal';
+  const roundCount = getRoundCountForIntensity(routine, intensity);
+  const adjustedExercises = routine.exercises.map((exercise) => applyIntensityToExercise(exercise, intensity));
 
   return {
     ...routine,
-    exercises: routine.exercises.map((exercise) => applyIntensityToExercise(exercise, intensity)),
+    roundsLabel: formatRoundLabel(roundCount),
+    roundCount,
+    exercises: adjustedExercises,
+    entries: buildRoutineEntries(
+      {
+        ...routine,
+        exercises: adjustedExercises,
+      },
+      intensity,
+    ),
   };
 }
 
@@ -388,9 +439,9 @@ function render() {
   const routine = getSelectedRoutine(log);
   const isToday = state.selectedDay === getTodayDayKey();
   const completedCount = getCompletedCount(log, state.selectedDay);
-  const totalCount = routine.exercises.length;
+  const totalCount = routine.entries.length;
   const completionPercent = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
-  const nextExercise = routine.exercises.find((_, index) => !(log.completed[state.selectedDay] || {})[index]);
+  const nextExercise = routine.entries.find((entry) => !(log.completed[state.selectedDay] || {})[entry.key]);
   const intensityKey = log.intensity || 'normal';
   const intensityPreset = INTENSITY_PRESETS[intensityKey];
   const weekSummary = getWeekSummary(state.logs, getToday());
@@ -419,7 +470,8 @@ function render() {
         <div class="progress-track"><span style="width:${completionPercent}%"></span></div>
         <div class="today-summary-row">
           <div class="summary-pill"><span>오늘 강도</span><strong>${intensityPreset.label}</strong></div>
-          <div class="summary-pill"><span>다음 운동</span><strong>${nextExercise ? nextExercise.name : '완료'}</strong></div>
+          <div class="summary-pill"><span>라운드</span><strong>${routine.roundsLabel}</strong></div>
+          <div class="summary-pill"><span>다음 운동</span><strong>${nextExercise ? `${nextExercise.round}R ${nextExercise.name}` : '완료'}</strong></div>
           <div class="summary-pill"><span>이번 주 회고</span><strong>${weekSummary.reflections.length}개</strong></div>
         </div>
         <div class="coach-note hero-note">
@@ -488,22 +540,25 @@ function render() {
           </label>
         </div>
         <div class="exercise-list">
-          ${routine.exercises
-            .map((exercise, index) => {
-              const isChecked = !!(log.completed[state.selectedDay] || {})[index];
-              const isNext = !isChecked && nextExercise && nextExercise.name === exercise.name;
+          ${routine.entries
+            .map((entry, index) => {
+              const isChecked = !!(log.completed[state.selectedDay] || {})[entry.key];
+              const isNext = !isChecked && nextExercise && nextExercise.key === entry.key;
               return `
-                <article class="exercise-card card ${isChecked ? 'done' : ''} ${isNext ? 'next' : ''} ${isToday ? 'clickable' : 'locked'}" data-exercise-card="${index}" ${isToday ? 'role="button" tabindex="0"' : ''}>
+                <article class="exercise-card card ${isChecked ? 'done' : ''} ${isNext ? 'next' : ''} ${isToday ? 'clickable' : 'locked'}" data-exercise-card="${entry.key}" ${isToday ? 'role="button" tabindex="0"' : ''}>
                   <div class="exercise-top">
                     <div class="exercise-index">${String(index + 1).padStart(2, '0')}</div>
                     <div class="exercise-copy">
                       <div class="exercise-title-row">
-                        <h4>${exercise.name}</h4>
+                        <div>
+                          <div class="round-badge">${entry.round}R</div>
+                          <h4>${entry.name}</h4>
+                        </div>
                         ${isNext ? '<span class="next-badge">다음</span>' : ''}
                         ${isChecked ? '<span class="done-badge">완료</span>' : ''}
                       </div>
-                      <div class="exercise-prescription">${exercise.prescription}</div>
-                      <p>${exercise.cue}</p>
+                      <div class="exercise-prescription">${entry.prescription}</div>
+                      <p>${entry.cue}</p>
                     </div>
                   </div>
                 </article>
@@ -666,9 +721,9 @@ function bindEvents() {
   document.querySelectorAll('[data-exercise-card]').forEach((card) => {
     const toggle = () => {
       const log = getWorkoutLog();
-      const index = card.dataset.exerciseCard;
+      const key = card.dataset.exerciseCard;
       log.completed[state.selectedDay] ||= {};
-      log.completed[state.selectedDay][index] = !log.completed[state.selectedDay][index];
+      log.completed[state.selectedDay][key] = !log.completed[state.selectedDay][key];
       saveState();
       render();
     };
