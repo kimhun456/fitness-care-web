@@ -1,0 +1,554 @@
+:root {
+  --bg: #07080b;
+  --surface: rgba(255, 255, 255, 0.04);
+  --surface-strong: rgba(255, 255, 255, 0.065);
+  --line: rgba(255, 255, 255, 0.08);
+  --line-soft: rgba(255, 255, 255, 0.05);
+  --text: #f6f7fb;
+  --text-secondary: #b7bfcb;
+  --text-tertiary: #7f8796;
+  --primary: #7282ff;
+  --primary-strong: #8b96ff;
+  --success: #35c77c;
+  --success-soft: rgba(53, 199, 124, 0.14);
+  --radius-sm: 16px;
+  --radius-md: 22px;
+  --radius-lg: 28px;
+  --radius-pill: 999px;
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 18px 40px rgba(0, 0, 0, 0.34);
+  --max-width: 760px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+  background:
+    radial-gradient(circle at top center, rgba(114, 130, 255, 0.18), transparent 0 24%),
+    linear-gradient(180deg, #040508 0%, #07080b 100%);
+  color: var(--text);
+  font-family: 'Geist', 'Noto Sans KR', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: 'liga' 1;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+}
+
+button {
+  border: 0;
+  cursor: pointer;
+}
+
+.app-shell {
+  width: min(var(--max-width), calc(100% - 20px));
+  margin: 0 auto;
+  padding: 16px 0 104px;
+}
+
+.card {
+  border-radius: var(--radius-md);
+  border: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.022));
+  box-shadow: var(--shadow-card);
+  backdrop-filter: blur(16px);
+}
+
+.top-strip,
+.today-card,
+.section-block,
+.exercise-card,
+.timer-card,
+.tip-list,
+.mobile-dock {
+  position: relative;
+}
+
+.top-strip {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.eyebrow,
+.section-kicker,
+.routine-badge,
+.next-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: var(--radius-pill);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+}
+
+.eyebrow,
+.section-kicker,
+.routine-badge {
+  background: rgba(114, 130, 255, 0.12);
+  border: 1px solid rgba(114, 130, 255, 0.18);
+  color: #d0d6ff;
+}
+
+.top-strip h1,
+.today-card h2,
+.section-head h3,
+.exercise-title-row h4 {
+  margin: 0;
+}
+
+.top-strip h1 {
+  margin-top: 10px;
+  font-size: clamp(28px, 8vw, 40px);
+  line-height: 1.04;
+  letter-spacing: -0.06em;
+  font-weight: 700;
+}
+
+.install-btn,
+.primary-btn,
+.secondary-btn,
+.ghost-btn,
+.day-chip,
+.dock-btn {
+  min-height: 46px;
+  padding: 0 14px;
+  border-radius: 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.install-btn,
+.ghost-btn,
+.day-chip,
+.dock-btn {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--line);
+  color: var(--text-secondary);
+}
+
+.primary-btn {
+  background: linear-gradient(180deg, var(--primary-strong), var(--primary));
+  color: white;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 12px 22px rgba(114, 130, 255, 0.22);
+}
+
+.secondary-btn {
+  background: var(--success-soft);
+  border: 1px solid rgba(53, 199, 124, 0.2);
+  color: #c3f6d7;
+}
+
+.hidden {
+  display: none !important;
+}
+
+.today-card,
+.section-block {
+  padding: 18px;
+  margin-bottom: 14px;
+}
+
+.today-card-top,
+.today-summary-row,
+.section-head,
+.split-head,
+.exercise-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.today-card h2 {
+  margin-top: 10px;
+  font-size: 24px;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+  font-weight: 600;
+}
+
+.today-card p,
+.coach-note p,
+.exercise-copy p,
+.tip-item p,
+.note-input::placeholder {
+  color: var(--text-secondary);
+}
+
+.today-card p,
+.coach-note p,
+.exercise-copy p,
+.tip-item p {
+  margin: 8px 0 0;
+  line-height: 1.7;
+  font-size: 14px;
+}
+
+.today-progress {
+  text-align: right;
+}
+
+.today-progress span,
+.summary-pill span,
+.exercise-prescription,
+.tip-item strong,
+.section-head .section-kicker,
+.timer-buttons button,
+.session-toggle span {
+  color: var(--text-tertiary);
+}
+
+.today-progress strong {
+  display: block;
+  margin-top: 6px;
+  font-size: 28px;
+  letter-spacing: -0.05em;
+}
+
+.progress-track,
+.tiny-track {
+  height: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.progress-track {
+  margin: 18px 0 16px;
+}
+
+.progress-track span,
+.tiny-track span {
+  display: block;
+  height: 100%;
+  background: linear-gradient(90deg, var(--success), var(--primary));
+  border-radius: inherit;
+}
+
+.today-summary-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.summary-pill,
+.tip-item,
+.exercise-card,
+.timer-card {
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: var(--surface);
+}
+
+.summary-pill,
+.tip-item,
+.exercise-card,
+.timer-card,
+.coach-note {
+  padding: 14px;
+}
+
+.summary-pill strong,
+.exercise-prescription,
+.exercise-title-row h4,
+.tip-item strong {
+  display: block;
+  margin-top: 8px;
+}
+
+.summary-pill strong,
+.exercise-title-row h4 {
+  color: var(--text);
+  font-size: 16px;
+  letter-spacing: -0.03em;
+  font-weight: 600;
+}
+
+.coach-note {
+  margin-top: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(114, 130, 255, 0.18);
+  background: rgba(114, 130, 255, 0.1);
+}
+
+.coach-note strong {
+  display: block;
+  color: #eef1ff;
+  font-size: 15px;
+}
+
+.day-chip-row,
+.timer-buttons,
+.bottom-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.day-chip-row {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+
+.day-chip {
+  min-height: 72px;
+  padding: 10px 8px;
+  text-align: left;
+}
+
+.day-chip span,
+.day-chip strong {
+  display: block;
+}
+
+.day-chip span {
+  font-size: 12px;
+}
+
+.day-chip strong {
+  margin-top: 8px;
+  color: var(--text);
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.day-chip.active {
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.day-chip.today {
+  border-color: rgba(114, 130, 255, 0.22);
+}
+
+.section-head {
+  margin-bottom: 12px;
+}
+
+.section-head h3 {
+  margin-top: 8px;
+  font-size: 20px;
+  line-height: 1.12;
+  letter-spacing: -0.04em;
+  font-weight: 600;
+}
+
+.session-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.session-toggle input,
+.check-wrap input {
+  width: 18px;
+  height: 18px;
+  accent-color: var(--primary);
+}
+
+.exercise-list {
+  display: grid;
+  gap: 10px;
+}
+
+.exercise-card {
+  padding: 14px;
+}
+
+.exercise-card.clickable {
+  cursor: pointer;
+  transition: transform 140ms ease, border-color 140ms ease, background 140ms ease, box-shadow 140ms ease;
+}
+
+.exercise-card.clickable:hover {
+  transform: translateY(-1px);
+  border-color: rgba(114, 130, 255, 0.18);
+}
+
+.exercise-card.clickable:active {
+  transform: scale(0.995);
+}
+
+.exercise-card.clickable:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(114, 130, 255, 0.18), var(--shadow-card);
+}
+
+.exercise-card.locked {
+  opacity: 0.72;
+}
+
+.exercise-card.done {
+  background: rgba(53, 199, 124, 0.1);
+  border-color: rgba(53, 199, 124, 0.18);
+}
+
+.exercise-card.next {
+  background: rgba(114, 130, 255, 0.1);
+  border-color: rgba(114, 130, 255, 0.2);
+}
+
+.exercise-index {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.04);
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: 13px;
+  color: var(--text);
+}
+
+.exercise-copy {
+  flex: 1;
+}
+
+.exercise-title-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  align-items: center;
+}
+
+.next-badge,
+.done-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 0 8px;
+  border-radius: var(--radius-pill);
+}
+
+.next-badge {
+  background: rgba(114, 130, 255, 0.12);
+  border: 1px solid rgba(114, 130, 255, 0.18);
+  color: #d0d6ff;
+}
+
+.done-badge {
+  background: rgba(53, 199, 124, 0.14);
+  border: 1px solid rgba(53, 199, 124, 0.2);
+  color: #c3f6d7;
+}
+
+.exercise-prescription {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.check-wrap {
+  display: grid;
+  place-items: center;
+  min-width: 24px;
+}
+
+.check-wrap.disabled {
+  opacity: 0.45;
+}
+
+.bottom-grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.timer-card {
+  padding: 18px;
+}
+
+.timer-value {
+  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-size: clamp(42px, 14vw, 64px);
+  line-height: 1;
+  letter-spacing: -0.06em;
+}
+
+.timer-buttons {
+  margin-top: 16px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.tip-list {
+  padding: 14px;
+  display: grid;
+  gap: 10px;
+}
+
+.tip-item p {
+  font-size: 13px;
+}
+
+.note-input {
+  width: 100%;
+  min-height: 120px;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text);
+  resize: vertical;
+  outline: none;
+}
+
+.note-input:focus {
+  border-color: rgba(114, 130, 255, 0.5);
+  box-shadow: 0 0 0 3px rgba(114, 130, 255, 0.14);
+}
+
+.mobile-dock {
+  position: fixed;
+  left: 10px;
+  right: 10px;
+  bottom: calc(10px + env(safe-area-inset-bottom, 0px));
+  z-index: 50;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  padding: 10px;
+  border-radius: 20px;
+  background: rgba(10, 11, 16, 0.94);
+  border: 1px solid var(--line-soft);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(14px);
+}
+
+.dock-btn.primary {
+  background: linear-gradient(180deg, var(--primary-strong), var(--primary));
+  color: white;
+  border: 0;
+}
+
+@media (max-width: 760px) {
+  .day-chip-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .today-card-top,
+  .split-head,
+  .exercise-top,
+  .top-strip {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .today-summary-row,
+  .bottom-grid,
+  .timer-buttons {
+    grid-template-columns: 1fr;
+  }
+}

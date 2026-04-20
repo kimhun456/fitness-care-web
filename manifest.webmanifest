@@ -1,0 +1,18 @@
+{
+  "name": "핏케어 루틴 보드",
+  "short_name": "핏케어",
+  "description": "식단 관리, 운동 루틴, 휴식 타이머를 모바일에서 보기 좋게 정리한 개인용 피트니스 보드",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#020617",
+  "theme_color": "#0f172a",
+  "lang": "ko",
+  "icons": [
+    {
+      "src": "/public/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}
