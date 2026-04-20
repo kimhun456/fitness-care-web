@@ -163,6 +163,10 @@ button {
   margin-bottom: 14px;
 }
 
+.hero-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(114, 130, 255, 0.08));
+}
+
 .today-card-top,
 .today-summary-row,
 .section-head,
@@ -286,6 +290,15 @@ button {
   background: rgba(114, 130, 255, 0.1);
 }
 
+.hero-note {
+  margin-top: 16px;
+}
+
+.hero-cta {
+  width: 100%;
+  margin-top: 14px;
+}
+
 .coach-note strong {
   display: block;
   color: #eef1ff;
@@ -294,7 +307,9 @@ button {
 
 .day-chip-row,
 .timer-buttons,
-.bottom-grid {
+.bottom-grid,
+.intensity-row,
+.weekly-summary-grid {
   display: grid;
   gap: 10px;
 }
@@ -344,6 +359,47 @@ button {
   line-height: 1.12;
   letter-spacing: -0.04em;
   font-weight: 600;
+}
+
+.intensity-row {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.intensity-chip {
+  min-height: 92px;
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--text-secondary);
+  text-align: left;
+}
+
+.intensity-chip strong,
+.intensity-chip span {
+  display: block;
+}
+
+.intensity-chip strong {
+  color: var(--text);
+  font-size: 15px;
+}
+
+.intensity-chip span {
+  margin-top: 8px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.intensity-chip.active {
+  background: rgba(114, 130, 255, 0.12);
+  border-color: rgba(114, 130, 255, 0.26);
+  box-shadow: inset 0 0 0 1px rgba(114, 130, 255, 0.12);
+}
+
+.intensity-chip:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
 }
 
 .session-toggle {
@@ -510,6 +566,45 @@ button {
   box-shadow: 0 0 0 3px rgba(114, 130, 255, 0.14);
 }
 
+.weekly-highlight {
+  background: rgba(114, 130, 255, 0.08);
+  border-color: rgba(114, 130, 255, 0.18);
+}
+
+.weekly-reflections {
+  padding: 14px;
+}
+
+.weekly-reflections strong {
+  display: block;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.weekly-reflections p {
+  margin: 0;
+  padding: 10px 0;
+  border-top: 1px solid var(--line-soft);
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.weekly-reflections p:first-of-type {
+  border-top: 0;
+  padding-top: 0;
+}
+
+.weekly-reflections p span {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.empty-copy {
+  color: var(--text-tertiary);
+}
+
 .mobile-dock {
   position: fixed;
   left: 10px;
@@ -548,7 +643,8 @@ button {
 
   .today-summary-row,
   .bottom-grid,
-  .timer-buttons {
+  .timer-buttons,
+  .intensity-row {
     grid-template-columns: 1fr;
   }
 }

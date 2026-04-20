@@ -1,6 +1,22 @@
-const today = new Date();
-const todayKey = today.toISOString().slice(0, 10);
-const storageKey = 'fitness-care-workout-v1';
+export const INTENSITY_PRESETS = {
+  light: {
+    label: '가볍게',
+    adjustment: -0.2,
+    message: '오늘은 리듬만 챙겨도 충분해요.',
+  },
+  normal: {
+    label: '보통',
+    adjustment: 0,
+    message: '기본 루틴으로 안정적으로 가요.',
+  },
+  focus: {
+    label: '집중',
+    adjustment: 0.2,
+    message: '컨디션이 괜찮다면 조금 더 밀어봐요.',
+  },
+};
+
+const storageKey = 'fitness-care-workout-v2';
 
 const weeklyPlan = {
   monday: {
@@ -152,42 +168,55 @@ const routineCatalog = {
 };
 
 const dayKeys = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'];
-const todayDayKey = dayKeys[today.getDay()];
 
-const defaultState = {
-  selectedDay: todayDayKey,
-  timerSeconds: 60,
-  logs: {
-    [todayKey]: createWorkoutLog(),
-  },
-};
+let runtimeNow = new Date();
+let state = loadState(runtimeNow);
+let timerHandle = null;
 
-function createWorkoutLog() {
+export function createWorkoutLog() {
   return {
     note: '',
     completed: {},
     sessionDone: false,
+    intensity: 'normal',
   };
 }
 
-function loadState() {
-  try {
-    const raw = localStorage.getItem(storageKey);
-    if (!raw) return structuredClone(defaultState);
-    const parsed = JSON.parse(raw);
-    return {
-      ...structuredClone(defaultState),
-      ...parsed,
-      selectedDay: weeklyPlan[parsed.selectedDay] ? parsed.selectedDay : todayDayKey,
-      logs: {
-        ...defaultState.logs,
-        ...(parsed.logs || {}),
-        [todayKey]: normalizeWorkoutLog(parsed.logs?.[todayKey]),
-      },
-    };
-  } catch {
-    return structuredClone(defaultState);
-  }
+function hasStorage() {
+  return typeof window !== 'undefined' && typeof window.localStorage !== 'undefined';
+}
+
+function clone(value) {
+  return JSON.parse(JSON.stringify(value));
+}
+
+export function formatDateKey(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+function getToday() {
+  return runtimeNow;
+}
+
+function getTodayKey() {
+  return formatDateKey(getToday());
+}
+
+function getTodayDayKey() {
+  return dayKeys[getToday().getDay()];
+}
+
+function getDefaultState(now = getToday()) {
+  return {
+    selectedDay: dayKeys[now.getDay()],
+    timerSeconds: 60,
+    logs: {
+      [formatDateKey(now)]: createWorkoutLog(),
+    },
+  };
 }
 
 function normalizeWorkoutLog(log) {
@@ -196,17 +225,45 @@ function normalizeWorkoutLog(log) {
     ...base,
     ...(log || {}),
     completed: log?.completed || {},
+    intensity: INTENSITY_PRESETS[log?.intensity] ? log.intensity : 'normal',
   };
 }
 
-let state = loadState();
-let timerHandle = null;
+function loadState(now = getToday()) {
+  const defaults = getDefaultState(now);
+
+  if (!hasStorage()) {
+    return clone(defaults);
+  }
+
+  try {
+    const raw = window.localStorage.getItem(storageKey);
+    if (!raw) return clone(defaults);
+    const parsed = JSON.parse(raw);
+    const todayKey = formatDateKey(now);
+
+    return {
+      ...clone(defaults),
+      ...parsed,
+      selectedDay: weeklyPlan[parsed.selectedDay] ? parsed.selectedDay : dayKeys[now.getDay()],
+      logs: {
+        ...defaults.logs,
+        ...(parsed.logs || {}),
+        [todayKey]: normalizeWorkoutLog(parsed.logs?.[todayKey]),
+      },
+    };
+  } catch {
+    return clone(defaults);
+  }
+}
 
 function saveState() {
-  localStorage.setItem(storageKey, JSON.stringify(state));
+  if (!hasStorage()) return;
+  window.localStorage.setItem(storageKey, JSON.stringify(state));
 }
 
 function getWorkoutLog() {
+  const todayKey = getTodayKey();
   if (!state.logs[todayKey]) state.logs[todayKey] = createWorkoutLog();
   state.logs[todayKey] = normalizeWorkoutLog(state.logs[todayKey]);
   return state.logs[todayKey];
@@ -216,12 +273,77 @@ function getSelectedPlan() {
   return weeklyPlan[state.selectedDay];
 }
 
-function getSelectedRoutine() {
-  return routineCatalog[getSelectedPlan().key];
+function adjustNumericValue(value, adjustment, unit) {
+  const minimum = unit === '초' ? 10 : 1;
+  return Math.max(minimum, Math.round(value * (1 + adjustment)));
+}
+
+export function applyIntensityToExercise(exercise, intensity) {
+  const preset = INTENSITY_PRESETS[intensity] || INTENSITY_PRESETS.normal;
+  const patterns = [
+    /^좌우 각 (\d+)(?:~(\d+))?(회|초)$/,
+    /^(\d+)(?:~(\d+))?(회|초)$/,
+  ];
+
+  for (const pattern of patterns) {
+    const match = exercise.prescription.match(pattern);
+    if (!match) continue;
+
+    const prefix = pattern === patterns[0] ? '좌우 각 ' : '';
+    const start = Number(match[1]);
+    const end = match[2] ? Number(match[2]) : null;
+    const unit = match[3];
+    const nextStart = adjustNumericValue(start, preset.adjustment, unit);
+    const nextEnd = end ? adjustNumericValue(end, preset.adjustment, unit) : null;
+
+    return {
+      ...exercise,
+      prescription: nextEnd ? `${prefix}${nextStart}~${nextEnd}${unit}` : `${prefix}${nextStart}${unit}`,
+    };
+  }
+
+  return exercise;
+}
+
+function getSelectedRoutine(log = getWorkoutLog()) {
+  const routine = routineCatalog[getSelectedPlan().key];
+  const intensity = log.intensity || 'normal';
+
+  return {
+    ...routine,
+    exercises: routine.exercises.map((exercise) => applyIntensityToExercise(exercise, intensity)),
+  };
 }
 
 function getCompletedCount(log, dayKey) {
   return Object.values(log.completed[dayKey] || {}).filter(Boolean).length;
+}
+
+function startOfWeek(date) {
+  const copy = new Date(date);
+  const diff = (copy.getDay() + 6) % 7;
+  copy.setDate(copy.getDate() - diff);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+}
+
+export function getWeekSummary(logs, now = getToday()) {
+  const start = startOfWeek(now);
+  const reflections = [];
+  let completedSessions = 0;
+
+  for (let offset = 0; offset < 7; offset += 1) {
+    const current = new Date(start);
+    current.setDate(start.getDate() + offset);
+    const dateKey = formatDateKey(current);
+    const log = logs[dateKey];
+
+    if (!log) continue;
+    if (log.sessionDone) completedSessions += 1;
+    if (log.note?.trim()) reflections.push({ dateKey, note: log.note.trim() });
+  }
+
+  return { completedSessions, reflections };
 }
 
 function getTodayWeekLabel() {
@@ -229,19 +351,49 @@ function getTodayWeekLabel() {
     month: 'long',
     day: 'numeric',
     weekday: 'long',
-  }).format(today);
+  }).format(getToday());
+}
+
+function formatShortDate(dateKey) {
+  const [year, month, day] = dateKey.split('-').map(Number);
+  return new Intl.DateTimeFormat('ko-KR', {
+    month: 'numeric',
+    day: 'numeric',
+  }).format(new Date(year, month - 1, day));
+}
+
+function renderWeeklyReflections(summary) {
+  if (!summary.reflections.length) {
+    return '<p class="empty-copy">아직 남긴 회고가 없어요.</p>';
+  }
+
+  return summary.reflections
+    .map(
+      ({ dateKey, note }) => `
+        <p>
+          <span>${formatShortDate(dateKey)}</span>
+          ${escapeHtml(note)}
+        </p>
+      `,
+    )
+    .join('');
 }
 
 function render() {
   const root = document.querySelector('#app');
+  if (!root) return;
+
   const log = getWorkoutLog();
   const plan = getSelectedPlan();
-  const routine = getSelectedRoutine();
-  const isToday = state.selectedDay === todayDayKey;
+  const routine = getSelectedRoutine(log);
+  const isToday = state.selectedDay === getTodayDayKey();
   const completedCount = getCompletedCount(log, state.selectedDay);
   const totalCount = routine.exercises.length;
   const completionPercent = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
   const nextExercise = routine.exercises.find((_, index) => !(log.completed[state.selectedDay] || {})[index]);
+  const intensityKey = log.intensity || 'normal';
+  const intensityPreset = INTENSITY_PRESETS[intensityKey];
+  const weekSummary = getWeekSummary(state.logs, getToday());
 
   root.innerHTML = `
     <main class="app-shell">
@@ -252,7 +404,7 @@ function render() {
         </div>
       </header>
 
-      <section class="today-card card">
+      <section class="today-card card hero-card">
         <div class="today-card-top">
           <div>
             <div class="routine-badge">${plan.label}</div>
@@ -260,19 +412,45 @@ function render() {
             <p>${plan.duration} · ${plan.warmup}</p>
           </div>
           <div class="today-progress">
-            <span>진행도</span>
+            <span>이번 주 ${weekSummary.completedSessions}회 완료</span>
             <strong>${completionPercent}%</strong>
           </div>
         </div>
         <div class="progress-track"><span style="width:${completionPercent}%"></span></div>
         <div class="today-summary-row">
-          <div class="summary-pill"><span>라운드</span><strong>${routine.rounds}</strong></div>
-          <div class="summary-pill"><span>휴식</span><strong>${routine.rest}</strong></div>
-          <div class="summary-pill"><span>다음</span><strong>${nextExercise ? nextExercise.name : '완료'}</strong></div>
+          <div class="summary-pill"><span>오늘 강도</span><strong>${intensityPreset.label}</strong></div>
+          <div class="summary-pill"><span>다음 운동</span><strong>${nextExercise ? nextExercise.name : '완료'}</strong></div>
+          <div class="summary-pill"><span>이번 주 회고</span><strong>${weekSummary.reflections.length}개</strong></div>
         </div>
-        <div class="coach-note">
-          <strong>${plan.motivation}</strong>
+        <div class="coach-note hero-note">
+          <strong>${intensityPreset.message}</strong>
           <p>${plan.note}</p>
+        </div>
+        <button class="primary-btn hero-cta" data-action="scroll-routine">${completedCount ? '오늘 루틴 이어가기' : '오늘 루틴 시작'}</button>
+      </section>
+
+      <section class="section-block intensity-block">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">TODAY INTENSITY</div>
+            <h3>오늘 컨디션</h3>
+          </div>
+        </div>
+        <div class="intensity-row">
+          ${Object.entries(INTENSITY_PRESETS)
+            .map(
+              ([key, preset]) => `
+                <button
+                  class="intensity-chip ${intensityKey === key ? 'active' : ''}"
+                  data-intensity="${key}"
+                  ${!isToday ? 'disabled' : ''}
+                >
+                  <strong>${preset.label}</strong>
+                  <span>${preset.message}</span>
+                </button>
+              `,
+            )
+            .join('')}
         </div>
       </section>
 
@@ -288,7 +466,7 @@ function render() {
             .map((dayKey) => {
               const item = weeklyPlan[dayKey];
               return `
-                <button class="day-chip ${state.selectedDay === dayKey ? 'active' : ''} ${dayKey === todayDayKey ? 'today' : ''}" data-day="${dayKey}">
+                <button class="day-chip ${state.selectedDay === dayKey ? 'active' : ''} ${dayKey === getTodayDayKey() ? 'today' : ''}" data-day="${dayKey}">
                   <span>${shortLabelForDay(dayKey)}</span>
                   <strong>${item.label}</strong>
                 </button>
@@ -374,7 +552,26 @@ function render() {
             <h3>오늘 메모</h3>
           </div>
         </div>
-        <textarea class="note-input" data-note placeholder="예: 오늘은 푸쉬업 10회부터 힘들었음 / 런지는 균형이 흔들렸음">${escapeHtml(log.note)}</textarea>
+        <textarea class="note-input" data-note placeholder="예: 오늘 가장 힘들었던 동작 / 생각보다 괜찮았던 동작 / 다음에 조절하고 싶은 점">${escapeHtml(log.note)}</textarea>
+      </section>
+
+      <section class="section-block compact-block">
+        <div class="section-head">
+          <div>
+            <div class="section-kicker">WEEKLY PROGRESS</div>
+            <h3>이번 주 성취</h3>
+          </div>
+        </div>
+        <div class="weekly-summary-grid">
+          <div class="summary-pill weekly-highlight">
+            <span>완료 횟수</span>
+            <strong>이번 주 ${weekSummary.completedSessions}회 완료</strong>
+          </div>
+          <div class="weekly-reflections card">
+            <strong>이번 주 회고</strong>
+            ${renderWeeklyReflections(weekSummary)}
+          </div>
+        </div>
       </section>
 
       <nav class="mobile-dock">
@@ -426,12 +623,14 @@ function renderTipsForRoutine(key) {
   };
 
   return (tipSets[key] || [])
-    .map(([title, copy]) => `
-      <div class="tip-item">
-        <strong>${title}</strong>
-        <p>${copy}</p>
-      </div>
-    `)
+    .map(
+      ([title, copy]) => `
+        <div class="tip-item">
+          <strong>${title}</strong>
+          <p>${copy}</p>
+        </div>
+      `,
+    )
     .join('');
 }
 
@@ -442,6 +641,25 @@ function bindEvents() {
       saveState();
       render();
       document.querySelector('.exercise-list')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  });
+
+  document.querySelectorAll('[data-intensity]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const nextIntensity = button.dataset.intensity;
+      const log = getWorkoutLog();
+      const hasProgress = Object.values(log.completed[state.selectedDay] || {}).some(Boolean);
+
+      if (hasProgress && log.intensity !== nextIntensity) {
+        const confirmed = window.confirm('강도를 바꾸면 오늘 체크한 운동이 초기화돼요. 계속할까요?');
+        if (!confirmed) return;
+        log.completed[state.selectedDay] = {};
+        log.sessionDone = false;
+      }
+
+      log.intensity = nextIntensity;
+      saveState();
+      render();
     });
   });
 
@@ -581,4 +799,23 @@ function escapeHtml(value = '') {
     .replaceAll('"', '&quot;');
 }
 
-render();
+export function renderAppForTest(nextState, now = new Date('2026-04-20T09:00:00+09:00')) {
+  runtimeNow = now;
+  stopTimer();
+  state = {
+    ...getDefaultState(now),
+    ...clone(nextState),
+    logs: {
+      ...getDefaultState(now).logs,
+      ...(nextState.logs || {}),
+    },
+  };
+
+  const todayKey = formatDateKey(now);
+  state.logs[todayKey] = normalizeWorkoutLog(state.logs[todayKey]);
+  render();
+}
+
+if (typeof document !== 'undefined') {
+  render();
+}
