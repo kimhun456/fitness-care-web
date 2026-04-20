@@ -345,6 +345,24 @@ function buildRoutineEntries(routine, intensity) {
   return entries;
 }
 
+function getRoundProgress(routine, completedMap) {
+  const rounds = Array.from({ length: routine.roundCount }, (_, index) => {
+    const round = index + 1;
+    const entries = routine.entries.filter((entry) => entry.round === round);
+    const completed = entries.filter((entry) => completedMap[entry.key]).length;
+    return {
+      round,
+      total: entries.length,
+      completed,
+      done: completed === entries.length,
+      entries,
+    };
+  });
+
+  const activeRound = rounds.find((round) => !round.done) || rounds[rounds.length - 1];
+  return { rounds, activeRound };
+}
+
 function getSelectedRoutine(log = getWorkoutLog()) {
   const routine = routineCatalog[getSelectedPlan().key];
   const intensity = log.intensity || 'normal';
@@ -441,7 +459,9 @@ function render() {
   const completedCount = getCompletedCount(log, state.selectedDay);
   const totalCount = routine.entries.length;
   const completionPercent = totalCount ? Math.round((completedCount / totalCount) * 100) : 0;
-  const nextExercise = routine.entries.find((entry) => !(log.completed[state.selectedDay] || {})[entry.key]);
+  const completedMap = log.completed[state.selectedDay] || {};
+  const nextExercise = routine.entries.find((entry) => !completedMap[entry.key]);
+  const roundProgress = getRoundProgress(routine, completedMap);
   const intensityKey = log.intensity || 'normal';
   const intensityPreset = INTENSITY_PRESETS[intensityKey];
   const weekSummary = getWeekSummary(state.logs, getToday());
@@ -470,7 +490,7 @@ function render() {
         <div class="progress-track"><span style="width:${completionPercent}%"></span></div>
         <div class="today-summary-row">
           <div class="summary-pill"><span>오늘 강도</span><strong>${intensityPreset.label}</strong></div>
-          <div class="summary-pill"><span>라운드</span><strong>${routine.roundsLabel}</strong></div>
+          <div class="summary-pill"><span>현재 라운드</span><strong>${roundProgress.activeRound ? `${roundProgress.activeRound.round} / ${routine.roundCount}` : routine.roundsLabel}</strong></div>
           <div class="summary-pill"><span>다음 운동</span><strong>${nextExercise ? `${nextExercise.round}R ${nextExercise.name}` : '완료'}</strong></div>
           <div class="summary-pill"><span>이번 주 회고</span><strong>${weekSummary.reflections.length}개</strong></div>
         </div>
@@ -533,16 +553,29 @@ function render() {
           <div>
             <div class="section-kicker">TODAY FLOW</div>
             <h3>${plan.label} 운동 순서</h3>
+            <p class="round-summary-copy">${routine.roundsLabel} · 완료한 라운드는 자동으로 접혀요.</p>
           </div>
           <label class="session-toggle">
             <input type="checkbox" data-session-done ${log.sessionDone && isToday ? 'checked' : ''} ${!isToday ? 'disabled' : ''} />
             <span>오늘 운동 완료</span>
           </label>
         </div>
+        <div class="round-progress-row">
+          ${roundProgress.rounds
+            .map(
+              (round) => `
+                <div class="round-progress-pill ${round.done ? 'done' : ''} ${roundProgress.activeRound?.round === round.round ? 'active' : ''}">
+                  <span>${round.round}R</span>
+                  <strong>${round.completed}/${round.total}</strong>
+                </div>
+              `,
+            )
+            .join('')}
+        </div>
         <div class="exercise-list">
-          ${routine.entries
+          ${roundProgress.activeRound.entries
             .map((entry, index) => {
-              const isChecked = !!(log.completed[state.selectedDay] || {})[entry.key];
+              const isChecked = !!completedMap[entry.key];
               const isNext = !isChecked && nextExercise && nextExercise.key === entry.key;
               return `
                 <article class="exercise-card card ${isChecked ? 'done' : ''} ${isNext ? 'next' : ''} ${isToday ? 'clickable' : 'locked'}" data-exercise-card="${entry.key}" ${isToday ? 'role="button" tabindex="0"' : ''}>

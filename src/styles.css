@@ -361,6 +361,13 @@ button {
   font-weight: 600;
 }
 
+.round-summary-copy {
+  margin: 8px 0 0;
+  color: var(--text-tertiary);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
 .intensity-row {
   grid-template-columns: repeat(3, minmax(0, 1fr));
 }
@@ -420,6 +427,46 @@ button {
 .exercise-list {
   display: grid;
   gap: 10px;
+}
+
+.round-progress-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.round-progress-pill {
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.round-progress-pill span,
+.round-progress-pill strong {
+  display: block;
+}
+
+.round-progress-pill span {
+  color: var(--text-tertiary);
+  font-size: 12px;
+}
+
+.round-progress-pill strong {
+  margin-top: 6px;
+  color: var(--text);
+  font-size: 15px;
+}
+
+.round-progress-pill.active {
+  border-color: rgba(114, 130, 255, 0.26);
+  background: rgba(114, 130, 255, 0.1);
+}
+
+.round-progress-pill.done {
+  border-color: rgba(53, 199, 124, 0.2);
+  background: rgba(53, 199, 124, 0.08);
 }
 
 .exercise-card {
@@ -661,7 +708,8 @@ button {
   .today-summary-row,
   .bottom-grid,
   .timer-buttons,
-  .intensity-row {
+  .intensity-row,
+  .round-progress-row {
     grid-template-columns: 1fr;
   }
 }

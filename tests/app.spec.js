@@ -60,8 +60,9 @@ describe('render flow', () => {
     expect(document.body.textContent).toContain('보통');
     expect(document.body.textContent).toContain('이번 주 1회 완료');
     expect(document.body.textContent).toContain('오늘 컨디션');
-    expect(document.querySelectorAll('[data-exercise-card]').length).toBe(15);
+    expect(document.querySelectorAll('[data-exercise-card]').length).toBe(5);
     expect(document.body.textContent).toContain('3라운드');
+    expect(document.body.textContent).toContain('1 / 3');
   });
 
   it('light 강도에서는 조정된 처방과 주간 회고를 함께 보여준다', () => {
@@ -82,6 +83,33 @@ describe('render flow', () => {
     expect(document.body.textContent).toContain('이번 주 회고');
     expect(document.body.textContent).toContain('런지 균형이 좋아졌음');
     expect(document.body.textContent).toContain('1R');
+  });
+
+  it('첫 라운드를 끝내면 다음 라운드만 보여준다', () => {
+    renderAppForTest({
+      selectedDay: 'monday',
+      timerSeconds: 60,
+      logs: {
+        '2026-04-20': {
+          note: '',
+          completed: {
+            monday: {
+              'r1-e0': true,
+              'r1-e1': true,
+              'r1-e2': true,
+              'r1-e3': true,
+              'r1-e4': true,
+            },
+          },
+          sessionDone: false,
+          intensity: 'normal',
+        },
+      },
+    });
+
+    expect(document.querySelectorAll('[data-exercise-card]').length).toBe(5);
+    expect(document.body.textContent).toContain('2 / 3');
+    expect(document.querySelector('.round-badge')?.textContent).toBe('2R');
   });
 
   it('강도 변경 확인을 취소하면 기존 체크 상태를 유지한다', () => {
