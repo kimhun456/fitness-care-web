@@ -1,21 +1,21 @@
 :root {
-  --bg: #07080b;
-  --surface: rgba(255, 255, 255, 0.04);
-  --surface-strong: rgba(255, 255, 255, 0.065);
+  --bg: #08090a;
+  --surface: rgba(255, 255, 255, 0.03);
+  --surface-strong: rgba(255, 255, 255, 0.05);
   --line: rgba(255, 255, 255, 0.08);
   --line-soft: rgba(255, 255, 255, 0.05);
-  --text: #f6f7fb;
-  --text-secondary: #b7bfcb;
-  --text-tertiary: #7f8796;
-  --primary: #7282ff;
-  --primary-strong: #8b96ff;
-  --success: #35c77c;
-  --success-soft: rgba(53, 199, 124, 0.14);
-  --radius-sm: 16px;
-  --radius-md: 22px;
-  --radius-lg: 28px;
+  --text: #f7f8f8;
+  --text-secondary: #b7bec8;
+  --text-tertiary: #868b94;
+  --primary: #5e6ad2;
+  --primary-strong: #7170ff;
+  --success: #27a644;
+  --success-soft: rgba(39, 166, 68, 0.14);
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 8px;
   --radius-pill: 999px;
-  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.05), 0 18px 40px rgba(0, 0, 0, 0.34);
+  --shadow-card: 0 0 0 1px rgba(255, 255, 255, 0.04), 0 10px 24px rgba(0, 0, 0, 0.22);
   --max-width: 760px;
 }
 
@@ -31,12 +31,10 @@ body {
   margin: 0;
   min-height: 100vh;
   padding-bottom: env(safe-area-inset-bottom, 0px);
-  background:
-    radial-gradient(circle at top center, rgba(114, 130, 255, 0.18), transparent 0 24%),
-    linear-gradient(180deg, #040508 0%, #07080b 100%);
+  background: linear-gradient(180deg, #060708 0%, #08090a 100%);
   color: var(--text);
-  font-family: 'Geist', 'Noto Sans KR', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  font-feature-settings: 'liga' 1;
+  font-family: 'Inter', 'Noto Sans KR', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  font-feature-settings: 'liga' 1, 'cv01' 1, 'ss03' 1;
 }
 
 button,
@@ -59,9 +57,9 @@ button {
 .card {
   border-radius: var(--radius-md);
   border: 1px solid var(--line-soft);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.022));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.022));
   box-shadow: var(--shadow-card);
-  backdrop-filter: blur(16px);
+  backdrop-filter: blur(10px);
 }
 
 .top-strip,
@@ -92,8 +90,8 @@ button {
   padding: 0 10px;
   border-radius: var(--radius-pill);
   font-size: 11px;
-  font-weight: 600;
-  letter-spacing: -0.02em;
+  font-weight: 500;
+  letter-spacing: 0;
 }
 
 .eyebrow,
@@ -113,10 +111,10 @@ button {
 
 .top-strip h1 {
   margin-top: 10px;
-  font-size: clamp(28px, 8vw, 40px);
-  line-height: 1.04;
-  letter-spacing: -0.06em;
-  font-weight: 700;
+  font-size: clamp(30px, 8vw, 36px);
+  line-height: 1.02;
+  letter-spacing: -0.04em;
+  font-weight: 600;
 }
 
 .install-btn,
@@ -127,16 +125,16 @@ button {
 .dock-btn {
   min-height: 46px;
   padding: 0 14px;
-  border-radius: 14px;
+  border-radius: 6px;
   font-size: 14px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .install-btn,
 .ghost-btn,
 .day-chip,
 .dock-btn {
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--line);
   color: var(--text-secondary);
 }
@@ -144,7 +142,7 @@ button {
 .primary-btn {
   background: linear-gradient(180deg, var(--primary-strong), var(--primary));
   color: white;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 12px 22px rgba(114, 130, 255, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), 0 8px 18px rgba(94, 106, 210, 0.22);
 }
 
 .secondary-btn {
@@ -164,7 +162,7 @@ button {
 }
 
 .hero-card {
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(114, 130, 255, 0.08));
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.042), rgba(94, 106, 210, 0.08));
 }
 
 .today-card-top,
@@ -182,7 +180,7 @@ button {
   margin-top: 10px;
   font-size: 24px;
   line-height: 1.1;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.03em;
   font-weight: 600;
 }
 
@@ -221,7 +219,7 @@ button {
   display: block;
   margin-top: 6px;
   font-size: 28px;
-  letter-spacing: -0.05em;
+  letter-spacing: -0.03em;
 }
 
 .progress-track,
@@ -279,7 +277,7 @@ button {
 .exercise-title-row h4 {
   color: var(--text);
   font-size: 16px;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   font-weight: 600;
 }
 
@@ -341,7 +339,7 @@ button {
 }
 
 .day-chip.active {
-  background: rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.05);
   box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
 }
 
@@ -357,7 +355,7 @@ button {
   margin-top: 8px;
   font-size: 20px;
   line-height: 1.12;
-  letter-spacing: -0.04em;
+  letter-spacing: -0.02em;
   font-weight: 600;
 }
 
@@ -375,9 +373,9 @@ button {
 .intensity-chip {
   min-height: 92px;
   padding: 14px;
-  border-radius: 14px;
+  border-radius: 8px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.025);
   color: var(--text-secondary);
   text-align: left;
 }
@@ -438,9 +436,9 @@ button {
 
 .round-progress-pill {
   padding: 12px;
-  border-radius: 14px;
+  border-radius: 8px;
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.025);
 }
 
 .round-progress-pill span,
@@ -511,10 +509,10 @@ button {
   height: 42px;
   display: grid;
   place-items: center;
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.04);
-  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
   font-size: 13px;
   color: var(--text);
 }
@@ -540,11 +538,11 @@ button {
   min-height: 22px;
   padding: 0 8px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--line);
   color: var(--text-tertiary);
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .next-badge,
@@ -592,7 +590,7 @@ button {
 }
 
 .timer-value {
-  font-family: 'Geist Mono', ui-monospace, monospace;
+  font-family: ui-monospace, 'SF Mono', Menlo, monospace;
   font-size: clamp(42px, 14vw, 64px);
   line-height: 1;
   letter-spacing: -0.06em;
@@ -619,7 +617,7 @@ button {
   padding: 14px;
   border-radius: var(--radius-sm);
   border: 1px solid var(--line);
-  background: rgba(255, 255, 255, 0.03);
+  background: rgba(255, 255, 255, 0.02);
   color: var(--text);
   resize: vertical;
   outline: none;
@@ -679,11 +677,11 @@ button {
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
   padding: 10px;
-  border-radius: 20px;
-  background: rgba(10, 11, 16, 0.94);
+  border-radius: 8px;
+  background: rgba(12, 13, 16, 0.96);
   border: 1px solid var(--line-soft);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
-  backdrop-filter: blur(14px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(10px);
 }
 
 .dock-btn.primary {
