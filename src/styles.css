@@ -117,7 +117,6 @@ button {
   font-weight: 600;
 }
 
-.install-btn,
 .primary-btn,
 .secondary-btn,
 .ghost-btn,
@@ -130,7 +129,6 @@ button {
   font-weight: 500;
 }
 
-.install-btn,
 .ghost-btn,
 .day-chip,
 .dock-btn {
